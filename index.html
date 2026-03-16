@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hüseyin Harun Özkan - Interactive CV</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+  @keyframes blink-cursor { 0%,100%{opacity:1} 50%{opacity:0} }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  @keyframes pulse-glow { 0%,100%{box-shadow:0 0 5px rgba(0,255,136,0.3)} 50%{box-shadow:0 0 20px rgba(0,255,136,0.6)} }
+  @keyframes scan { 0%{top:-100%} 100%{top:100%} }
+  @keyframes fadeInUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes typewriter { from{width:0} to{width:100%} }
+  @keyframes skillFill { from{width:0} to{width:var(--fill)} }
+  @keyframes pixelate { 0%{opacity:0;transform:scale(0.8)} 100%{opacity:1;transform:scale(1)} }
+  @keyframes xpGain { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
+
+  .pixel-font { font-family: 'Press Start 2P', monospace; }
+  .body-font { font-family: 'Outfit', sans-serif; }
+  .blink-cursor::after { content:'_'; animation: blink-cursor 1s infinite; }
+  .float-anim { animation: float 3s ease-in-out infinite; }
+  .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+  .fade-in-up { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+  .skill-fill { animation: skillFill 1.5s ease-out forwards; }
+  .xp-popup { animation: xpGain 1.5s ease-out forwards; position:absolute; pointer-events:none; }
+
+  .scanline::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:2px;
+    background:rgba(0,255,136,0.1); animation:scan 8s linear infinite; pointer-events:none; z-index:1;
+  }
+
+  .nav-btn { transition: all 0.2s; position: relative; overflow: hidden; }
+  .nav-btn:hover { transform: translateY(-2px); }
+  .nav-btn.active { transform: scale(1.05); }
+  .nav-btn.active::after {
+    content:''; position:absolute; bottom:0; left:10%; right:10%; height:3px;
+    border-radius:2px;
+  }
+
+  .quest-card {
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .quest-card::before {
+    content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent);
+    transition: left 0.5s;
+  }
+  .quest-card:hover::before { left:100%; }
+  .quest-card:hover { transform: translateY(-3px); }
+
+  .skill-orb {
+    width:48px; height:48px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; cursor:pointer; transition:all 0.3s;
+    position:relative;
+  }
+  .skill-orb:hover { transform:scale(1.2); }
+  .skill-orb:active { animation: shake 0.3s; }
+
+  .timeline-dot {
+    width:16px; height:16px; border-radius:50%;
+    position:relative; z-index:2; transition: all 0.3s; cursor:pointer;
+  }
+  .timeline-dot:hover { transform:scale(1.5); }
+  .timeline-dot.active-dot { transform:scale(1.3); }
+
+  .progress-bar-bg { height:8px; border-radius:4px; overflow:hidden; }
+  .progress-bar-fill { height:100%; border-radius:4px; transition: width 1s ease-out; }
+
+  .level-badge {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px; border-radius:4px; font-size:10px;
+  }
+
+  .section-panel { display:none; }
+  .section-panel.active-panel { display:block; }
+
+  .character-avatar {
+    width:120px; height:120px; border-radius:50%; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    font-size:48px; overflow:hidden;
+  }
+  .character-avatar::after {
+    content:''; position:absolute; inset:0; border-radius:50%;
+  }
+
+  .stat-bar { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .stat-label { width:80px; font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+  .stat-value { font-size:11px; width:35px; text-align:right; }
+
+  .cert-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 12px; border-radius:6px; font-size:12px;
+    transition: all 0.3s; cursor:default;
+  }
+  .cert-badge:hover { transform:translateY(-2px); }
+
+  .xp-counter { font-variant-numeric: tabular-nums; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { border-radius:3px; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full body-font">
+  <div id="app" class="h-full w-full overflow-auto relative scanline" style="background:#0a0e17;"><!-- XP Bar at very top -->
+   <div id="xp-bar-container" style="position:sticky;top:0;z-index:50;padding:0 0;">
+    <div style="height:4px;width:100%;background:#141a2a;">
+     <div id="xp-bar-fill" style="height:100%;width:0%;border-radius:0 2px 2px 0;transition:width 1s ease-out;background:#00ff88;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 16px;font-size:10px;background:rgba(10,14,23,0.95);"><span class="pixel-font" style="color:#00ff88;">LVL <span id="level-display">1</span></span> <span style="color:#5a6a8a;" class="xp-counter">XP: <span id="xp-display">0</span> / <span id="xp-max">100</span></span>
+    </div>
+   </div><!-- Hero Section -->
+   <header id="hero-section" class="fade-in-up" style="padding:40px 20px 20px;text-align:center;">
+    <div class="character-avatar float-anim" style="margin:0 auto 20px;border:3px solid #00ff88;background:linear-gradient(135deg,#0f1a2e,#1a2744);"><span>🧑‍💻</span>
+     <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(0,255,136,0.2);"></div>
+    </div>
+    <h1 id="hero-name-el" class="pixel-font blink-cursor" style="font-size:18px;color:#00ff88;margin-bottom:8px;">Hüseyin Harun Özkan</h1>
+    <p id="hero-title-el" style="font-size:14px;color:#5a8a9a;margin-bottom:4px;">İş Analisti &amp; Veri Meraklısı</p>
+    <p style="font-size:12px;color:#3a5060;">📍 Mamak, Ankara</p><!-- Mini Stats -->
+    <div style="display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap;">
+     <div class="pulse-glow" style="padding:8px 16px;border-radius:8px;background:#111827;border:1px solid #1e3a2a;">
+      <div style="font-size:10px;color:#5a8a6a;">
+       GPA
+      </div>
+      <div class="pixel-font" style="font-size:14px;color:#00ff88;">
+       3.62
+      </div>
+     </div>
+     <div style="padding:8px 16px;border-radius:8px;background:#111827;border:1px solid #1e2a3a;">
+      <div style="font-size:10px;color:#5a6a8a;">
+       Sertifika
+      </div>
+      <div class="pixel-font" style="font-size:14px;color:#4a9eff;">
+       10
+      </div>
+     </div>
+     <div style="padding:8px 16px;border-radius:8px;background:#111827;border:1px solid #2a1e3a;">
+      <div style="font-size:10px;color:#8a5a9a;">
+       Deneyim
+      </div>
+      <div class="pixel-font" style="font-size:14px;color:#c084fc;">
+       4
+      </div>
+     </div>
+    </div>
+   </header><!-- Navigation Tabs (Game Menu Style) -->
+   <nav style="display:flex;justify-content:center;gap:6px;padding:16px 12px;flex-wrap:wrap;" id="nav-bar"><button class="nav-btn active pixel-font" data-section="about" onclick="switchSection('about')" style="font-size:9px;padding:8px 14px;border-radius:6px;border:1px solid #00ff88;background:#0f1f15;color:#00ff88;cursor:pointer;"> ⚔️ Hakkımda </button> <button class="nav-btn pixel-font" data-section="skills" onclick="switchSection('skills')" style="font-size:9px;padding:8px 14px;border-radius:6px;border:1px solid #1e293b;background:#111827;color:#5a6a8a;cursor:pointer;"> 🛡️ Beceriler </button> <button class="nav-btn pixel-font" data-section="quests" onclick="switchSection('quests')" style="font-size:9px;padding:8px 14px;border-radius:6px;border:1px solid #1e293b;background:#111827;color:#5a6a8a;cursor:pointer;"> 🗡️ Görevler </button> <button class="nav-btn pixel-font" data-section="inventory" onclick="switchSection('inventory')" style="font-size:9px;padding:8px 14px;border-radius:6px;border:1px solid #1e293b;background:#111827;color:#5a6a8a;cursor:pointer;"> 📜 Sertifika </button> <button class="nav-btn pixel-font" data-section="education" onclick="switchSection('education')" style="font-size:9px;padding:8px 14px;border-radius:6px;border:1px solid #1e293b;background:#111827;color:#5a6a8a;cursor:pointer;"> 🎓 Eğitim </button>
+   </nav><!-- Content Sections -->
+   <main style="padding:0 16px 40px;max-width:700px;margin:0 auto;"><!-- ABOUT SECTION -->
+    <section id="section-about" class="section-panel active-panel fade-in-up">
+     <div style="background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;position:relative;">
+      <div style="position:absolute;top:12px;right:12px;" class="level-badge"><span style="background:#0f2a1a;color:#00ff88;padding:2px 8px;border-radius:4px;font-size:10px;">📖 Karakter Bilgisi</span>
+      </div>
+      <h2 class="pixel-font" style="font-size:12px;color:#00ff88;margin-bottom:16px;">// HAKKIMDA</h2>
+      <p id="about-text-el" style="color:#94a3b8;font-size:14px;line-height:1.8;">Yönetim Bilişim Sistemleri mezunuyum. Analitik düşünme, problem çözme ve süreç geliştirme konularında güçlü bir ilgim var. SQL, Python, Excel ve Power BI gibi araçlarla veri analizi ve görselleştirme üzerine çalışmalar yapıyorum. Teknoloji ve veri odaklı projelerde yer alarak hem teknik becerilerimi hem de iş analizi perspektifimi geliştirmeyi hedefliyorum.</p><!-- Character Stats RPG Style -->
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e293b;">
+       <h3 class="pixel-font" style="font-size:10px;color:#4a9eff;margin-bottom:12px;">KARAKTER ÖZELLİKLERİ</h3>
+       <div class="stat-bar"><span class="stat-label" style="color:#5a8a6a;">Analitik</span>
+        <div class="progress-bar-bg" style="flex:1;background:#1a2a1a;">
+         <div class="progress-bar-fill skill-fill" style="--fill:90%;width:90%;background:linear-gradient(90deg,#00ff88,#00cc6a);"></div>
+        </div><span class="stat-value pixel-font" style="color:#00ff88;">90</span>
+       </div>
+       <div class="stat-bar"><span class="stat-label" style="color:#5a6a9a;">Problem Ç.</span>
+        <div class="progress-bar-bg" style="flex:1;background:#1a1a2a;">
+         <div class="progress-bar-fill skill-fill" style="--fill:85%;width:85%;background:linear-gradient(90deg,#4a9eff,#2a7adf);"></div>
+        </div><span class="stat-value pixel-font" style="color:#4a9eff;">85</span>
+       </div>
+       <div class="stat-bar"><span class="stat-label" style="color:#8a5a9a;">Uyumluluk</span>
+        <div class="progress-bar-bg" style="flex:1;background:#2a1a2a;">
+         <div class="progress-bar-fill skill-fill" style="--fill:88%;width:88%;background:linear-gradient(90deg,#c084fc,#9a5adc);"></div>
+        </div><span class="stat-value pixel-font" style="color:#c084fc;">88</span>
+       </div>
+       <div class="stat-bar"><span class="stat-label" style="color:#8a7a5a;">Disiplin</span>
+        <div class="progress-bar-bg" style="flex:1;background:#2a2a1a;">
+         <div class="progress-bar-fill skill-fill" style="--fill:92%;width:92%;background:linear-gradient(90deg,#fbbf24,#d9a520);"></div>
+        </div><span class="stat-value pixel-font" style="color:#fbbf24;">92</span>
+       </div>
+      </div>
+     </div>
+    </section><!-- SKILLS SECTION -->
+    <section id="section-skills" class="section-panel">
+     <div style="background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;">
+      <h2 class="pixel-font" style="font-size:12px;color:#4a9eff;margin-bottom:20px;">// BECERİ AĞACI</h2>
+      <p style="font-size:11px;color:#5a6a8a;margin-bottom:16px;">💡 Orblara tıklayarak XP kazan!</p>
+      <div id="skills-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:16px;">
+      </div><!-- Language Skill -->
+      <div style="margin-top:20px;padding-top:16px;border-top:1px solid #1e293b;">
+       <h3 class="pixel-font" style="font-size:10px;color:#fbbf24;margin-bottom:12px;">🌐 DİL</h3>
+       <div style="display:flex;align-items:center;gap:12px;"><span style="font-size:14px;color:#94a3b8;">İngilizce</span> <span class="level-badge pixel-font" style="font-size:9px;background:#2a2a1a;color:#fbbf24;border:1px solid #3a3a2a;">B2</span>
+        <div class="progress-bar-bg" style="flex:1;background:#2a2a1a;">
+         <div class="progress-bar-fill" style="width:70%;background:linear-gradient(90deg,#fbbf24,#d9a520);"></div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section><!-- QUESTS (Experience) SECTION -->
+    <section id="section-quests" class="section-panel">
+     <div style="background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;">
+      <h2 class="pixel-font" style="font-size:12px;color:#c084fc;margin-bottom:20px;">// GÖREV GEÇMİŞİ</h2>
+      <div id="quests-container"></div>
+     </div>
+    </section><!-- INVENTORY (Certificates) SECTION -->
+    <section id="section-inventory" class="section-panel">
+     <div style="background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;">
+      <h2 class="pixel-font" style="font-size:12px;color:#fbbf24;margin-bottom:20px;">// SERTİFİKA ENVANTERİ</h2>
+      <p style="font-size:11px;color:#5a6a8a;margin-bottom:16px;">🎒 Toplanan eşyalar (sertifikalar)</p>
+      <div id="certs-container" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+     </div>
+    </section><!-- EDUCATION SECTION -->
+    <section id="section-education" class="section-panel">
+     <div style="background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;">
+      <h2 class="pixel-font" style="font-size:12px;color:#00ff88;margin-bottom:20px;">// EĞİTİM</h2>
+      <div style="display:flex;align-items:flex-start;gap:16px;">
+       <div style="font-size:36px;animation:float 3s ease-in-out infinite;">
+        🎓
+       </div>
+       <div>
+        <h3 style="color:#e2e8f0;font-size:16px;font-weight:600;">Ankara Yıldırım Beyazıt Üniversitesi</h3>
+        <p style="color:#4a9eff;font-size:13px;">Yönetim Bilişim Sistemleri (İngilizce)</p>
+        <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;"><span class="level-badge pixel-font" style="font-size:9px;background:#0f2a1a;color:#00ff88;border:1px solid #1e3a2a;">GPA: 3.62/4.0</span> <span class="level-badge" style="font-size:10px;background:#1a1a2a;color:#5a6a8a;border:1px solid #1e293b;">Eylül 2020 – Haziran 2025</span>
+        </div>
+        <p style="color:#64748b;font-size:12px;margin-top:8px;">📍 Ankara, Türkiye</p>
+       </div>
+      </div><!-- Progress to graduation -->
+      <div style="margin-top:20px;padding:16px;background:#0a0e17;border-radius:8px;border:1px solid #1e293b;">
+       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span class="pixel-font" style="font-size:9px;color:#00ff88;">MEZUN DURUMU</span> <span class="pixel-font" style="font-size:9px;color:#fbbf24;">✅ TAMAMLANDI</span>
+       </div>
+       <div class="progress-bar-bg" style="background:#1a2a1a;">
+        <div class="progress-bar-fill" style="width:100%;background:linear-gradient(90deg,#00ff88,#fbbf24);"></div>
+       </div>
+      </div>
+     </div>
+    </section>
+   </main><!-- Footer -->
+   <footer style="text-align:center;padding:20px;border-top:1px solid #1e293b;">
+    <p class="pixel-font" style="font-size:8px;color:#3a4a5a;">[ PRESS START TO CONTINUE ] 🎮</p>
+   </footer>
+  </div>
+  <script>
+// ===== DATA =====
+const skillsData = [
+  { name:'Excel', emoji:'📊', level:88, color:'#00ff88', bg:'#0f2a1a', border:'#1e3a2a' },
+  { name:'Python', emoji:'🐍', level:80, color:'#4a9eff', bg:'#0f1a2e', border:'#1e2a4a' },
+  { name:'SQL', emoji:'🗃️', level:82, color:'#c084fc', bg:'#1f0f2e', border:'#2e1e4a' },
+  { name:'Power BI', emoji:'📈', level:75, color:'#fbbf24', bg:'#2a2a1a', border:'#3a3a2a' },
+  { name:'JIRA', emoji:'📋', level:70, color:'#f97316', bg:'#2a1a0a', border:'#3a2a1a' },
+  { name:'Java', emoji:'☕', level:65, color:'#ef4444', bg:'#2a0f0f', border:'#3a1e1e' },
+  { name:'HTML/CSS/JS', emoji:'🌐', level:72, color:'#06b6d4', bg:'#0a1a2a', border:'#1a2a3a' },
+  { name:'Proje Yön.', emoji:'🎯', level:78, color:'#a3e635', bg:'#1a2a0a', border:'#2a3a1a' },
+];
+
+const questsData = [
+  {
+    company:'Dece Software', role:'Yazılım Test Mühendisi', location:'Ankara',
+    date:'Eyl 2025 – Eki 2025', type:'⚔️ Ana Görev',
+    desc:'Test süreçleri ve Jira kullanımı üzerine temel deneyim kazandım. Detaylara dikkat etme, hataları fark etme ve süreçlerin doğruluğunu analiz etme becerilerimi geliştirdim.',
+    color:'#00ff88', xp:250
+  },
+  {
+    company:'Podbee Media', role:'İş Analisti Stajyeri', location:'İstanbul (Remote)',
+    date:'Oca 2025 – Nis 2025', type:'🗡️ Yan Görev',
+    desc:'Farklı veri setleri üzerinde düzenleme, temizleme ve yapılandırma işlemleri gerçekleştirdim. Veri görselleştirmeleri oluşturarak verilerin anlamlı hale gelmesini sağladım.',
+    color:'#4a9eff', xp:300
+  },
+  {
+    company:'Research İstanbul', role:'Araştırma ve İş Analisti Stajyeri', location:'İstanbul (Remote)',
+    date:'Eki 2024 – Oca 2025', type:'🛡️ Keşif Görevi',
+    desc:'Veri toplama, temizleme ve düzenleme süreçlerinde aktif rol aldım. Verileri analiz ederek grafik ve tablolarla görselleştirdim. Raporlama süreçlerine katkı sağladım.',
+    color:'#c084fc', xp:350
+  },
+  {
+    company:'KPMG', role:'İş Analisti Stajyeri', location:'İstanbul (Remote)',
+    date:'Tem 2024 – Eki 2024', type:'🏰 Boss Görevi',
+    desc:'Manuel test süreçlerinde yer aldım ve proje dokümantasyonları hazırladım. Excel\'de veri düzenleme ve kontrol işlemleri gerçekleştirdim. Destek talepleriyle çalışarak kullanıcı ihtiyaçlarının analiz edilmesine destek oldum.',
+    color:'#fbbf24', xp:400
+  },
+];
+
+const certsData = [
+  { name:'İş Analistliği ve Proje Yönetimi Atölyesi', source:'Tech İstanbul', emoji:'🏆' },
+  { name:'İş Zekası Eğitimi', source:'Edutech', emoji:'📊' },
+  { name:'Python İle Yapay Öğrenme Atölyesi', source:'BTK', emoji:'🤖' },
+  { name:'Aspire Leaders Program', source:'Aspire Institute', emoji:'🌟' },
+  { name:'Python Programming for Data Science', source:'Miuul', emoji:'🐍' },
+  { name:'Yapay Zeka ve Girişimcilik', source:'Dijital Dönüşüm Ofisi', emoji:'🚀' },
+  { name:'Yapay Zeka Temel Eğitim', source:'Sanayi Bakanlığı', emoji:'🧠' },
+  { name:'Temel Proje Yönetimi Eğitimi', source:'SCA Social', emoji:'📋' },
+  { name:'Querying MS SQL', source:'Miuul', emoji:'🗃️' },
+  { name:'Java Geliştirici Kursu', source:'Udemy', emoji:'☕' },
+];
+
+// ===== GAME STATE =====
+let totalXP = 0;
+let level = 1;
+let xpToNext = 100;
+let clickedSkills = new Set();
+let expandedQuest = null;
+
+// ===== RENDER FUNCTIONS =====
+function renderSkills() {
+  const grid = document.getElementById('skills-grid');
+  grid.innerHTML = '';
+  skillsData.forEach((skill, i) => {
+    const card = document.createElement('div');
+    card.style.cssText = `background:${skill.bg};border:1px solid ${skill.border};border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.3s;position:relative;`;
+    card.className = 'quest-card';
+    card.innerHTML = `
+      <div class="skill-orb" style="margin:0 auto 8px;background:radial-gradient(circle at 30% 30%,${skill.color}44,${skill.color}11);border:2px solid ${skill.color};">
+        <span>${skill.emoji}</span>
+      </div>
+      <div class="pixel-font" style="font-size:8px;color:${skill.color};margin-bottom:8px;">${skill.name}</div>
+      <div class="progress-bar-bg" style="background:${skill.color}11;">
+        <div class="progress-bar-fill" style="width:${skill.level}%;background:${skill.color};"></div>
+      </div>
+      <div style="font-size:10px;color:${skill.color};margin-top:4px;opacity:0.7;">Lv.${skill.level}</div>
+      ${clickedSkills.has(i) ? '<div style="position:absolute;top:4px;right:4px;font-size:10px;">✅</div>' : ''}
+    `;
+    card.addEventListener('click', () => {
+      if (!clickedSkills.has(i)) {
+        clickedSkills.add(i);
+        gainXP(skill.level, card);
+        renderSkills();
+      }
+    });
+    // Stagger animation
+    card.style.animation = `pixelate 0.4s ease-out ${i * 0.08}s forwards`;
+    card.style.opacity = '0';
+    grid.appendChild(card);
+  });
+}
+
+function renderQuests() {
+  const container = document.getElementById('quests-container');
+  container.innerHTML = '';
+  questsData.forEach((quest, i) => {
+    const card = document.createElement('div');
+    card.className = 'quest-card';
+    card.style.cssText = `background:#0a0e17;border:1px solid #1e293b;border-radius:10px;padding:16px;margin-bottom:12px;cursor:pointer;border-left:3px solid ${quest.color};`;
+    const isExpanded = expandedQuest === i;
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <span style="font-size:10px;color:${quest.color};background:${quest.color}15;padding:2px 8px;border-radius:4px;">${quest.type}</span>
+          <h3 style="color:#e2e8f0;font-size:15px;font-weight:600;margin-top:6px;">${quest.company}</h3>
+          <p style="color:${quest.color};font-size:12px;">${quest.role}</p>
+          <p style="color:#5a6a8a;font-size:11px;margin-top:2px;">📍 ${quest.location} · ${quest.date}</p>
+        </div>
+        <div style="text-align:right;">
+          <span class="pixel-font" style="font-size:9px;color:#fbbf24;">+${quest.xp} XP</span>
+          <div style="font-size:16px;margin-top:4px;transition:transform 0.3s;transform:rotate(${isExpanded?'180':'0'}deg);">▼</div>
+        </div>
+      </div>
+      ${isExpanded ? `
+        <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #1e293b;animation:fadeInUp 0.3s ease-out;">
+          <p style="color:#94a3b8;font-size:13px;line-height:1.7;">${quest.desc}</p>
+        </div>
+      ` : ''}
+    `;
+    card.addEventListener('click', () => {
+      expandedQuest = expandedQuest === i ? null : i;
+      renderQuests();
+    });
+    card.style.animation = `fadeInUp 0.4s ease-out ${i * 0.1}s forwards`;
+    card.style.opacity = '0';
+    container.appendChild(card);
+  });
+}
+
+function renderCerts() {
+  const container = document.getElementById('certs-container');
+  container.innerHTML = '';
+  const colors = ['#00ff88','#4a9eff','#c084fc','#fbbf24','#f97316','#ef4444','#06b6d4','#a3e635','#c084fc','#4a9eff'];
+  certsData.forEach((cert, i) => {
+    const c = colors[i % colors.length];
+    const badge = document.createElement('div');
+    badge.className = 'cert-badge';
+    badge.style.cssText = `background:${c}10;border:1px solid ${c}30;color:${c};`;
+    badge.innerHTML = `<span>${cert.emoji}</span><span style="font-size:11px;">${cert.name}</span><span style="font-size:9px;opacity:0.6;">— ${cert.source}</span>`;
+    badge.style.animation = `pixelate 0.3s ease-out ${i * 0.06}s forwards`;
+    badge.style.opacity = '0';
+    container.appendChild(badge);
+  });
+}
+
+// ===== GAME MECHANICS =====
+function gainXP(amount, sourceEl) {
+  totalXP += amount;
+  // Check level up
+  while (totalXP >= xpToNext) {
+    totalXP -= xpToNext;
+    level++;
+    xpToNext = Math.floor(xpToNext * 1.5);
+  }
+  updateXPBar();
+  // XP popup
+  if (sourceEl) {
+    const popup = document.createElement('div');
+    popup.className = 'xp-popup pixel-font';
+    popup.style.cssText = `color:#fbbf24;font-size:12px;top:-10px;left:50%;transform:translateX(-50%);z-index:99;`;
+    popup.textContent = `+${amount} XP`;
+    sourceEl.style.position = 'relative';
+    sourceEl.appendChild(popup);
+    setTimeout(() => popup.remove(), 1500);
+  }
+}
+
+function updateXPBar() {
+  document.getElementById('level-display').textContent = level;
+  document.getElementById('xp-display').textContent = totalXP;
+  document.getElementById('xp-max').textContent = xpToNext;
+  const pct = Math.min((totalXP / xpToNext) * 100, 100);
+  document.getElementById('xp-bar-fill').style.width = pct + '%';
+}
+
+// ===== NAVIGATION =====
+function switchSection(name) {
+  document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active-panel'));
+  const target = document.getElementById('section-' + name);
+  if (target) {
+    target.classList.add('active-panel');
+    target.classList.remove('fade-in-up');
+    void target.offsetWidth;
+    target.classList.add('fade-in-up');
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    const isActive = btn.dataset.section === name;
+    btn.classList.toggle('active', isActive);
+    if (isActive) {
+      btn.style.borderColor = '#00ff88';
+      btn.style.background = '#0f1f15';
+      btn.style.color = '#00ff88';
+    } else {
+      btn.style.borderColor = '#1e293b';
+      btn.style.background = '#111827';
+      btn.style.color = '#5a6a8a';
+    }
+  });
+
+  // Re-render dynamic sections
+  if (name === 'skills') renderSkills();
+  if (name === 'quests') renderQuests();
+  if (name === 'inventory') renderCerts();
+}
+
+// ===== ELEMENT SDK =====
+const defaultConfig = {
+  hero_name: 'Hüseyin Harun Özkan',
+  hero_title: 'İş Analisti & Veri Meraklısı',
+  about_text: 'Yönetim Bilişim Sistemleri mezunuyum. Analitik düşünme, problem çözme ve süreç geliştirme konularında güçlü bir ilgim var. SQL, Python, Excel ve Power BI gibi araçlarla veri analizi ve görselleştirme üzerine çalışmalar yapıyorum. Teknoloji ve veri odaklı projelerde yer alarak hem teknik becerilerimi hem de iş analizi perspektifimi geliştirmeyi hedefliyorum.',
+  background_color: '#0a0e17',
+  surface_color: '#111827',
+  primary_text_color: '#00ff88',
+  accent_color: '#4a9eff',
+  secondary_accent_color: '#c084fc',
+  font_family: 'Outfit',
+  font_size: 14
+};
+
+function applyConfig(config) {
+  const c = { ...defaultConfig, ...config };
+
+  document.getElementById('hero-name-el').textContent = c.hero_name;
+  document.getElementById('hero-title-el').textContent = c.hero_title;
+  document.getElementById('about-text-el').textContent = c.about_text;
+
+  // Colors
+  document.getElementById('app').style.background = c.background_color;
+  document.querySelectorAll('.section-panel > div').forEach(el => {
+    el.style.background = c.surface_color;
+  });
+
+  // Font
+  const fontStack = `${c.font_family}, Outfit, sans-serif`;
+  document.body.style.fontFamily = fontStack;
+
+  // Font size
+  const base = c.font_size || 14;
+  document.getElementById('hero-name-el').style.fontSize = `${base * 1.3}px`;
+  document.getElementById('hero-title-el').style.fontSize = `${base}px`;
+  document.getElementById('about-text-el').style.fontSize = `${base}px`;
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => { applyConfig(config); },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.primary_text_color || defaultConfig.primary_text_color, set: (v) => { config.primary_text_color = v; window.elementSdk.setConfig({ primary_text_color: v }); } },
+      { get: () => config.accent_color || defaultConfig.accent_color, set: (v) => { config.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); } },
+      { get: () => config.secondary_accent_color || defaultConfig.secondary_accent_color, set: (v) => { config.secondary_accent_color = v; window.elementSdk.setConfig({ secondary_accent_color: v }); } },
+    ],
+    borderables: [],
+    fontEditable: {
+      get: () => config.font_family || defaultConfig.font_family,
+      set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+    },
+    fontSizeable: {
+      get: () => config.font_size || defaultConfig.font_size,
+      set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+    }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['hero_name', config.hero_name || defaultConfig.hero_name],
+    ['hero_title', config.hero_title || defaultConfig.hero_title],
+    ['about_text', config.about_text || defaultConfig.about_text],
+  ])
+});
+
+// ===== INIT =====
+renderSkills();
+renderQuests();
+renderCerts();
+updateXPBar();
+
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dd5f75ab116bc3c',t:'MTc3MzY4NzI2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
